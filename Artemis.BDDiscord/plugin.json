@@ -1,0 +1,7 @@
+{
+  "Guid": "de1123d1-4ce5-418f-a761-20ed2ffb9566",
+  "Name": "Artemis.BDDiscord",
+  "Description": "An integration with BetterDiscord for Artemis.",
+  "Version": "1.0.0.0",
+  "Main": "Artemis.BDDiscord.dll"
+}
