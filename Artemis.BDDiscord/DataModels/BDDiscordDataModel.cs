@@ -27,19 +27,7 @@ namespace Artemis.BDDiscord.DataModels
         [DataModelProperty(Name = "User Status")]
         public UserStatus status { get; set; }
         [DataModelProperty(Name = "Mentions")]
-        public int Mentions
-        {
-            get
-            {
-                return mentions;
-            }
-            set
-            {
-                if (value > mentions) Mention.Trigger();
-                mentions = value;
-            }
-        }
-        private int mentions { get; set; }
+        public int mentions { get; set; }
         [DataModelProperty(Name = "Is Mentioned")]
         public bool IsMentioned
         {
@@ -49,19 +37,7 @@ namespace Artemis.BDDiscord.DataModels
             }
         }
         [DataModelProperty(Name = "Unread Messages")]
-        public int UnreadMessages
-        {
-            get
-            {
-                return unread_messages;
-            }
-            set
-            {
-                if (value > unread_messages) UnreadMessage.Trigger();
-                unread_messages = value;
-            }
-        }
-        private int unread_messages { get; set; }
+        public int unread_messages { get; set; }
         [DataModelProperty(Name = "Has Unread Messages")]
         public bool HasUnreadMessages
         {
