@@ -19,7 +19,7 @@ namespace Artemis.BDDiscord.DataModels
             None,
             Online,
             Idle,
-            DnD,
+            DND,
             Invisible
         }
         [DataModelProperty(Name = "ID")]
@@ -48,16 +48,19 @@ namespace Artemis.BDDiscord.DataModels
         }
         [DataModelProperty(Name = "Is Being Called")]
         public bool being_called { get; set; }
-        [DataModelProperty(Name = "Is Self-Muted")]
-        public bool self_mute { get; set; }
-        [DataModelProperty(Name = "Is Self-Deafened")]
-        public bool self_deafen { get; set; }
         [DataModelProperty(Name = "Is Muted")]
         public bool mute { get; set; }
+        [DataModelProperty(Name = "Is Self-Muted")]
+        public bool self_mute { get; set; }
         [DataModelProperty(Name = "Is Deafened")]
         public bool deafen { get; set; }
+        [DataModelProperty(Name = "Is Self-Deafened")]
+        public bool self_deafen { get; set; }
+        
+        
         public DataModelEvent Mention { get; set; } = new DataModelEvent();
-        public DataModelEvent UnreadMessage { get; set; } = new DataModelEvent();
+        [DataModelProperty(Name = "New Unread Server")]
+        public DataModelEvent NewUnreadServer { get; set; } = new DataModelEvent();
     }
     public class Guild
     {

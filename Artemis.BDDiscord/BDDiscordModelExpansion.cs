@@ -17,7 +17,7 @@ namespace Artemis.BDDiscord
         {
             JsonPluginEndPoint<BDDiscordDataModel> jsonPluginEndPoint = _webServerService.AddJsonEndPoint<BDDiscordDataModel>(this, "main", p => {
                 if (p.user.mentions > DataModel.user.mentions) DataModel.user.Mention.Trigger();
-                if (p.user.unread_messages > DataModel.user.unread_messages) DataModel.user.UnreadMessage.Trigger();
+                if (p.user.unread_messages > DataModel.user.unread_messages) DataModel.user.NewUnreadServer.Trigger();
                 DataModel.user = p.user;
                 DataModel.guild = p.guild;
                 DataModel.text = p.text;

@@ -1,4 +1,4 @@
-//META{"name":"ArtemisGSI","website":"https://artemis-rgb.com/","source":"CHANGE SOURCE LATER"}*//
+//META{"name":"ArtemisGSI","website":"https://artemis-rgb.com/","source":"https://github.com/AlpacaFur/Artemis.BDDiscord"}*//
 
 function getModule (props) {
 return BdApi.findModuleByProps.apply(null, props);

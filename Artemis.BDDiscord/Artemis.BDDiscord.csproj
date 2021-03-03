@@ -41,6 +41,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="BDDiscord.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="plugin.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

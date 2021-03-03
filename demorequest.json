@@ -1,0 +1,28 @@
+// http://localhost:9696/plugins/de1123d1-4ce5-418f-a761-20ed2ffb9566/main
+{
+	"user": {
+		"id": "816312056805457940",
+		"status": "online",
+		"self_mute": true,
+		"self_deafen": false,
+		"mentions": 1,
+		"unread_messages": 1,
+		"being_called": false,
+		"mute": true,
+		"deafen": false
+	},
+	"guild": {
+		"id": "816312722949013625",
+		"name": "demo's server"
+	},
+	"text": {
+		"id": "816312788949013628",
+		"type": 0,
+		"name": "general"
+	},
+	"voice": {
+		"id": "816312723049013628",
+		"type": 2,
+		"name": "Super Awesome VC"
+	}
+}
