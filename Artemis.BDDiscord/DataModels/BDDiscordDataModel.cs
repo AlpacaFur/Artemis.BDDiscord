@@ -26,24 +26,47 @@ namespace Artemis.BDDiscord.DataModels
         public string id { get; set; }
         [DataModelProperty(Name = "User Status")]
         public UserStatus status { get; set; }
+        private int _mentions { get; set; }
         [DataModelProperty(Name = "Mentions")]
-        public int mentions { get; set; }
+        public int mentions {
+            get
+            {
+                return _mentions;
+            }
+            set
+            {
+                if (value > _mentions) Mention.Trigger();
+                _mentions = value;
+            }
+        }
         [DataModelProperty(Name = "Is Mentioned")]
         public bool IsMentioned
         {
             get
             {
-                return mentions > 0;
+                return _mentions > 0;
             }
         }
-        [DataModelProperty(Name = "Unread Messages")]
-        public int unread_messages { get; set; }
-        [DataModelProperty(Name = "Has Unread Messages")]
-        public bool HasUnreadMessages
+        private int _unread_messages { get; set; }
+        [DataModelProperty(Name = "Unread Servers")]
+        public int unread_messages
         {
             get
             {
-                return unread_messages > 0;
+                return _unread_messages;
+            }
+            set
+            {
+                if (value > _unread_messages) NewUnreadServer.Trigger();
+                _unread_messages = value;
+            }
+        }
+        [DataModelProperty(Name = "Has Unread Servers")]
+        public bool HasUnreadServers
+        {
+            get
+            {
+                return _unread_messages > 0;
             }
         }
         [DataModelProperty(Name = "Is Being Called")]
@@ -56,7 +79,6 @@ namespace Artemis.BDDiscord.DataModels
         public bool deafen { get; set; }
         [DataModelProperty(Name = "Is Self-Deafened")]
         public bool self_deafen { get; set; }
-        
         
         public DataModelEvent Mention { get; set; } = new DataModelEvent();
         [DataModelProperty(Name = "New Unread Server")]
@@ -81,7 +103,7 @@ namespace Artemis.BDDiscord.DataModels
         [DataModelProperty(Name = "Channel ID")]
         public string id { get; set; }
         [DataModelProperty(Name = "Channel Type")]
-        public string type { get; set; }
+        public TextChannelType type { get; set; }
         [DataModelProperty(Name = "Channel Name")]
         public string name { get; set; }
     }
