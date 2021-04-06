@@ -99,7 +99,7 @@ module.exports = class ArtemisGSI {
     if (fs.existsSync("C:/ProgramData/Artemis/webserver.txt")) {
       this.url = fs.readFileSync("C:/ProgramData/Artemis/webserver.txt", 'utf8')
       if (this.url.startsWith("http://*:")) this.url = "http://localhost:" + this.url.slice(9);
-      this.url += "plugins/de1123d1-4ce5-418f-a761-20ed2ffb9566/main"
+      this.url += "plugins/de1123d1-4ce5-418f-a761-20ed2ffb9566/betterDiscordData"
       console.log("[ArtemisGSI]: Using '" + this.url + "'")
     }
     else {
