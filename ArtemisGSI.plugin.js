@@ -16,7 +16,7 @@ module.exports = class ArtemisGSI {
     }
 
     getVersion () {
-        return '3.0.0';
+        return '4.0.0';
     }
 
     getAuthor () {
@@ -68,10 +68,14 @@ module.exports = class ArtemisGSI {
                     `
                         Ported rewrite from AAGaming
                     `,
-	'3.0.0':
-		    `
-			Edited to work with Artemis
-		    `
+        '3.0.0':
+                    `
+                        Edited to work with Artemis
+                    `,
+        '4.0.0':
+                    `
+                        Changed the endpoint url from main to betterDiscordData.
+                    `
         };
     }
 
