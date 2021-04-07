@@ -1,7 +1,6 @@
 ﻿using Artemis.BDDiscord.DataModels;
 using Artemis.Core.DataModelExpansions;
 using Artemis.Core.Services;
-using Newtonsoft.Json;
 
 namespace Artemis.BDDiscord
 {
