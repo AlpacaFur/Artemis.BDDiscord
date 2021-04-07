@@ -16,7 +16,7 @@ module.exports = class ArtemisGSI {
     }
 
     getVersion () {
-        return '4.0.0';
+        return '4.0.1';
     }
 
     getAuthor () {
@@ -75,6 +75,10 @@ module.exports = class ArtemisGSI {
         '4.0.0':
                     `
                         Changed the endpoint url from main to betterDiscordData.
+                    `,
+        '4.0.1':
+                    `
+                        Artemis-side changes to bump Nuget packages
                     `
         };
     }
