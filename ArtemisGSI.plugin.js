@@ -4,19 +4,17 @@ function getModule (props) {
 return BdApi.findModuleByProps.apply(null, props);
 }
 
-
-
 module.exports = class ArtemisGSI {
     getName () {
         return 'ArtemisGSI';
     }
 
     getDescription () {
-        return 'Sends information to Artemis about users connecting to/disconnecting from, mute/deafen status';
+        return 'Sends information to Artemis about various Discord components.';
     }
 
     getVersion () {
-        return '4.0.1';
+        return '4.1.0';
     }
 
     getAuthor () {
@@ -79,9 +77,59 @@ module.exports = class ArtemisGSI {
         '4.0.1':
                     `
                         Artemis-side changes to bump Nuget packages
+                    `,
+        '4.1.0':
+                    `
+                        Added the option to override the URL.
                     `
         };
     }
+
+  getSettingsPanel() {
+    let div = document.createElement("div")
+    div.classList.add("artemis-rgb-settings")
+    let label = document.createElement("label")
+    label.textContent = "Root Endpoint URL (leave empty to fetch from Artemis):"
+    let input = document.createElement("input")
+    input.setAttribute("placeholder", this.defaultUrl || "Unable to load default URL")
+    input.setAttribute("value", this.savedUrl)
+    let button = document.createElement("button")
+    button.textContent = "Set URL"
+    
+    let currentUrlLabel = document.createElement("p")
+    currentUrlLabel.textContent = "Current URL:"
+    let currentUrl = document.createElement("p")
+    currentUrl.textContent = this.url || "No URL set!"
+    button.addEventListener("click", ()=>{
+      if (input.value == "") {
+        this.savedUrl = ""
+        if (this.defaultUrl) {
+          this.url = this.defaultUrl + this.pluginUrlEnding
+          currentUrl.textContent = this.url
+        }
+        else {
+          this.url = ""
+          currentUrl.textContent = "No URL set!"
+        }
+        BdApi.saveData("ArtemisGSI", "endpoint-url", "")
+        console.log("[ArtemisGSI]: Using '" + this.url + "'")
+      }
+      else {
+        if (!input.value.endsWith("/")) input.value += "/"
+        if (!input.value.startsWith("http://")) input.value = "http://" + input.value 
+        this.savedUrl = input.value
+        currentUrl.textContent = input.value + this.pluginUrlEnding
+        BdApi.saveData("ArtemisGSI", "endpoint-url", input.value)
+        this.url = input.value + this.pluginUrlEnding
+        console.log("[ArtemisGSI]: Using '" + this.url + "'")
+      }
+      this.sendJsonToArtemis(this.json)
+    })
+    let style = document.createElement("style")
+    style.textContent = `.artemis-rgb-settings{padding:20px;box-sizing:border-box;border-radius:10px}.artemis-rgb-settings > input{background-color:var(--artemis-rgb-el);border:none;padding:5px 10px;border-radius:5px;color:var(--artemis-rgb-fg);font-family:monospace;width:100%;box-sizing:border-box;margin-top:10px}.artemis-rgb-settings > button{margin:5px 0;padding:10px 22px;background-color:#3E82E5;color:white;border-radius:3px;border:none;transition:background-color 0.15s ease}.artemis-rgb-settings > button:hover{background-color:#3875CE}.artemis-rgb-settings > button:active{background-color:#3268B7}.theme-light .artemis-rgb-settings{color:black;background-color:#ffffff;--artemis-rgb-bg:#ffffff;--artemis-rgb-fg:black;--artemis-rgb-el:#ddd}.theme-dark .artemis-rgb-settings{color:white;background-color:#36393F;--artemis-rgb-bg:#36393F;--artemis-rgb-fg:white;--artemis-rgb-el:#4c5059}.artemis-rgb-settings > p:last-child{font-family:monospace}`
+    div.append(style, label, input, button, currentUrlLabel, currentUrl)
+    return div
+  }
 
   getSelectedGuild () {
     const channel = this.getChannel(this.channels.getChannelId())
@@ -103,20 +151,21 @@ module.exports = class ArtemisGSI {
   load () {}// legacy
 
   start () {
+    this.pluginUrlEnding = "plugins/de1123d1-4ce5-418f-a761-20ed2ffb9566/betterDiscordData"
+    this.savedUrl = BdApi.loadData("ArtemisGSI", "endpoint-url") || ""
     let fs = require("fs")
     if (fs.existsSync("C:/ProgramData/Artemis/webserver.txt")) {
-      this.url = fs.readFileSync("C:/ProgramData/Artemis/webserver.txt", 'utf8')
-      if (this.url.startsWith("http://*:")) this.url = "http://localhost:" + this.url.slice(9);
-      this.url += "plugins/de1123d1-4ce5-418f-a761-20ed2ffb9566/betterDiscordData"
-      console.log("[ArtemisGSI]: Using '" + this.url + "'")
+      this.defaultUrl = fs.readFileSync("C:/ProgramData/Artemis/webserver.txt", 'utf8')
+      if (this.defaultUrl.startsWith("http://*:")) this.defaultUrl = "http://localhost:" + this.defaultUrl.slice(9);
     }
-    else {
-      if (BdApi) {
-        BdApi.alert("Plugin Error","Artemis doesn't seem to be installed! Couldn't find the webserver.txt file at \"C:/ProgramData/Artemis/webserver.txt\"")
-      }
-      console.error("[ArtemisGSI]: Artemis doesn't seem to be installed! Couldn't find the webserver.txt file at \"C:/ProgramData/Artemis/webserver.txt\"")
-      return;
+    else if (!this.savedUrl) {
+      BdApi.alert("Plugin Error","Artemis doesn't seem to be installed! Couldn't find the webserver.txt file at \"C:/ProgramData/Artemis/webserver.txt\" \n\n If you know that it is installed, please set the root URL in settings!")
     }
+    if (this.savedUrl) this.url = this.savedUrl + this.pluginUrlEnding
+    else if (this.defaultUrl) this.url = this.defaultUrl + this.pluginUrlEnding
+    else this.url = undefined
+    console.log("[ArtemisGSI]: Using '" + this.url + "'")
+
     this.json = {
       user:{
         id: -1,
@@ -162,6 +211,7 @@ module.exports = class ArtemisGSI {
        * { getChannel } = getModule([ 'getChannel' ], false), // we dont use this yet
        * const { getVoiceStates } = getModule([ 'getVoiceState' ], false),
        */
+    
     this.updatetimer = setInterval(() => {
       // eslint-disable-next-line consistent-this
       const guild = this.getSelectedGuild();
