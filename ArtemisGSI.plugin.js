@@ -14,7 +14,7 @@ module.exports = class ArtemisGSI {
     }
 
     getVersion () {
-        return '4.2.0';
+        return '4.2.1';
     }
 
     getAuthor () {
@@ -85,6 +85,10 @@ module.exports = class ArtemisGSI {
         '4.2.0':
                     `
                         Added the option to specify local network URLs and added last request response indicator.
+                    `,
+        '4.2.1':
+                    `
+                      Bug Fixes for the settings menu + clean up properly on restarts.
                     `
         };
     }
@@ -93,7 +97,7 @@ module.exports = class ArtemisGSI {
     let div = document.createElement("div")
     div.classList.add("artemis-rgb-settings")
     let label = document.createElement("label")
-    label.textContent = "Host URL (leave empty to fetch from Artemis):"
+    label.textContent = "Host URL (leave empty for default):"
 
     let innerContainer = document.createElement("div")
     let http = document.createElement("p")
@@ -101,7 +105,7 @@ module.exports = class ArtemisGSI {
 
     let input = document.createElement("input")
     input.setAttribute("placeholder", this.urlToFormat(this.defaultUrl) || "Unable to load default URL")
-    input.setAttribute("value", this.currentUrl())
+    if (this.savedUrl) input.setAttribute("value", this.savedUrl)
 
     innerContainer.append(http, input)
 
@@ -118,6 +122,7 @@ module.exports = class ArtemisGSI {
     let status = document.createElement("span")
     status.classList.remove("success")
     status.classList.remove("error")
+    console.log(this.lastRequestWasError)
     status.classList.add(this.lastRequestWasError ? "error" : "success")
     status.textContent = this.lastRequestWasError ? "Error" : "Success"
     lastReq.append(status)
@@ -128,7 +133,9 @@ module.exports = class ArtemisGSI {
         if (this.defaultUrl) {
           this.setUrl(this.defaultUrl)
           currentUrl.textContent = this.currentUrl()
+          this.savedUrl = ""
           BdApi.saveData("ArtemisGSI", "endpoint-url", "")
+          BdApi.showToast("URL reset successfully!", {type:"success"})
           status.classList.remove("error", "success")
           status.classList.add("pending")
           status.textContent = "Pending..."
@@ -139,21 +146,27 @@ module.exports = class ArtemisGSI {
           })
         }
         else {
+          this.savedUrl = ""
           this.invalidateUrl()
           currentUrl.textContent = "No URL set!"
           BdApi.saveData("ArtemisGSI", "endpoint-url", "")
           BdApi.showToast("URL Reset to default, but the default couldn't be found!", {type:"warn"})
+          status.classList.remove("pending", "success")
+          status.classList.add("error")
+          status.textContent = "Error"
+          this.lastRequestWasError = true
         }
       }
       else {
         let error = this.setUrl(input.value)
         if (error) {
-          BdApi.showToast("Invalid URL!", {type:"error"})
+          BdApi.showToast("Invalid URL: make sure to specify a host and a port!", {type:"error"})
         }
         else {
           currentUrl.textContent = this.currentUrl()
           BdApi.saveData("ArtemisGSI", "endpoint-url", this.currentUrl())
           BdApi.showToast("URL successfully saved!", {type:"success"})
+          this.savedUrl = this.currentUrl()
           status.classList.remove("error", "success")
           status.classList.add("pending")
           status.textContent = "Pending..."
@@ -189,20 +202,20 @@ module.exports = class ArtemisGSI {
     return this.getStatus(this.getCurrentUser().id);
   }
 
-  load () {}// legacy
-
   urlToFormat(url) {
+    if (!url) return url
     try {
       url = new URL(url)
     }
     catch {
-      console.error("[ArtemisGSI]: Invalid url:", x)
+      console.error("[ArtemisGSI]: Invalid url:", url)
       return true
     }
     return url.hostname + ':' + url.port
   }
 
   currentUrl() {
+    if (!this.host || !this.port) return undefined
     return this.host + ":" + this.port
   }
 
@@ -255,7 +268,7 @@ module.exports = class ArtemisGSI {
     console.log(`[ArtemisGSI]: Using host "${this.host}" and port "${this.port}"`)
 
     this.http = require("http")
-    this.lastRequestWasError = false
+    this.lastRequestWasError = true
     this.json = {
       user:{
         id: -1,
@@ -401,26 +414,17 @@ module.exports = class ArtemisGSI {
     }, 100);
   }
 
-  async sendJsonToArtemis (json) {
-    fetch(this.url, {
-      method: 'POST',
-      body: JSON.stringify(json),
-      mode:'no-cors',
-      headers:{
-        'Content-Type': 'application/json'
-      }
-    })
-      .catch(error => console.log(`Artemis GSI error: ${error}`));
-  }
-
   sendJsonViaHttp(json, callback) {
     if (!this.host || !this.port) {
+      this.lastRequestWasError = true
+      if (callback) callback(true)
       console.warn("[ArtemisGSI] Host or port is undefined!")
+      return
     }
 
     const data = JSON.stringify(json)
 
-    const req = http.request({
+    const req = this.http.request({
       hostname: this.host,
       port: this.port,
       path: '/plugins/de1123d1-4ce5-418f-a761-20ed2ffb9566/betterDiscordData',
@@ -448,5 +452,11 @@ module.exports = class ArtemisGSI {
     clearInterval(this.updatetimer);
     // this.unpatch();
     this.ready = false;
+    this.lastJson = false;
+    this.defaultUrl = false;
+    this.host = false;
+    this.port = false;
+    this.savedUrl = false;
+    this.lastRequestWasError = false;
   }
 };
