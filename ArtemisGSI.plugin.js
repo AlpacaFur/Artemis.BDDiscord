@@ -14,7 +14,7 @@ module.exports = class ArtemisGSI {
     }
 
     getVersion () {
-        return '4.1.0';
+        return '4.2.0';
     }
 
     getAuthor () {
@@ -81,6 +81,10 @@ module.exports = class ArtemisGSI {
         '4.1.0':
                     `
                         Added the option to override the URL.
+                    `,
+        '4.2.0':
+                    `
+                        Added the option to specify local network URLs and added last request response indicator.
                     `
         };
     }
@@ -89,45 +93,82 @@ module.exports = class ArtemisGSI {
     let div = document.createElement("div")
     div.classList.add("artemis-rgb-settings")
     let label = document.createElement("label")
-    label.textContent = "Root Endpoint URL (leave empty to fetch from Artemis):"
+    label.textContent = "Host URL (leave empty to fetch from Artemis):"
+
+    let innerContainer = document.createElement("div")
+    let http = document.createElement("p")
+    http.textContent = "http://"
+
     let input = document.createElement("input")
-    input.setAttribute("placeholder", this.defaultUrl || "Unable to load default URL")
-    input.setAttribute("value", this.savedUrl)
+    input.setAttribute("placeholder", this.urlToFormat(this.defaultUrl) || "Unable to load default URL")
+    input.setAttribute("value", this.currentUrl())
+
+    innerContainer.append(http, input)
+
     let button = document.createElement("button")
     button.textContent = "Set URL"
     
     let currentUrlLabel = document.createElement("p")
     currentUrlLabel.textContent = "Current URL:"
     let currentUrl = document.createElement("p")
-    currentUrl.textContent = this.url || "No URL set!"
+    currentUrl.textContent = this.currentUrl() || "No URL set!"
+
+    let lastReq = document.createElement("p")
+    lastReq.textContent = "Last Request: "
+    let status = document.createElement("span")
+    status.classList.remove("success")
+    status.classList.remove("error")
+    status.classList.add(this.lastRequestWasError ? "error" : "success")
+    status.textContent = this.lastRequestWasError ? "Error" : "Success"
+    lastReq.append(status)
+
     button.addEventListener("click", ()=>{
-      if (input.value == "") {
-        this.savedUrl = ""
+      if (input.value.startsWith("http://")) input.value = input.value.slice(7)
+      if (input.value.trim() == "") {
         if (this.defaultUrl) {
-          this.url = this.defaultUrl + this.pluginUrlEnding
-          currentUrl.textContent = this.url
+          this.setUrl(this.defaultUrl)
+          currentUrl.textContent = this.currentUrl()
+          BdApi.saveData("ArtemisGSI", "endpoint-url", "")
+          status.classList.remove("error", "success")
+          status.classList.add("pending")
+          status.textContent = "Pending..."
+          this.sendJsonViaHttp(this.json, (error)=>{
+            status.classList.remove("pending")
+            status.classList.add(error ? "error" : "success")
+            status.textContent = error ? "Error" : "Success"
+          })
         }
         else {
-          this.url = ""
+          this.invalidateUrl()
           currentUrl.textContent = "No URL set!"
+          BdApi.saveData("ArtemisGSI", "endpoint-url", "")
+          BdApi.showToast("URL Reset to default, but the default couldn't be found!", {type:"warn"})
         }
-        BdApi.saveData("ArtemisGSI", "endpoint-url", "")
-        console.log("[ArtemisGSI]: Using '" + this.url + "'")
       }
       else {
-        if (!input.value.endsWith("/")) input.value += "/"
-        if (!input.value.startsWith("http://")) input.value = "http://" + input.value 
-        this.savedUrl = input.value
-        currentUrl.textContent = input.value + this.pluginUrlEnding
-        BdApi.saveData("ArtemisGSI", "endpoint-url", input.value)
-        this.url = input.value + this.pluginUrlEnding
-        console.log("[ArtemisGSI]: Using '" + this.url + "'")
+        let error = this.setUrl(input.value)
+        if (error) {
+          BdApi.showToast("Invalid URL!", {type:"error"})
+        }
+        else {
+          currentUrl.textContent = this.currentUrl()
+          BdApi.saveData("ArtemisGSI", "endpoint-url", this.currentUrl())
+          BdApi.showToast("URL successfully saved!", {type:"success"})
+          status.classList.remove("error", "success")
+          status.classList.add("pending")
+          status.textContent = "Pending..."
+          this.sendJsonViaHttp(this.json, (error)=>{
+            status.classList.remove("pending")
+            status.classList.add(error ? "error" : "success")
+            status.textContent = error ? "Error" : "Success"
+          })
+          
+        }
       }
-      this.sendJsonToArtemis(this.json)
     })
     let style = document.createElement("style")
-    style.textContent = `.artemis-rgb-settings{padding:20px;box-sizing:border-box;border-radius:10px}.artemis-rgb-settings > input{background-color:var(--artemis-rgb-el);border:none;padding:5px 10px;border-radius:5px;color:var(--artemis-rgb-fg);font-family:monospace;width:100%;box-sizing:border-box;margin-top:10px}.artemis-rgb-settings > button{margin:5px 0;padding:10px 22px;background-color:#3E82E5;color:white;border-radius:3px;border:none;transition:background-color 0.15s ease}.artemis-rgb-settings > button:hover{background-color:#3875CE}.artemis-rgb-settings > button:active{background-color:#3268B7}.theme-light .artemis-rgb-settings{color:black;background-color:#ffffff;--artemis-rgb-bg:#ffffff;--artemis-rgb-fg:black;--artemis-rgb-el:#ddd}.theme-dark .artemis-rgb-settings{color:white;background-color:#36393F;--artemis-rgb-bg:#36393F;--artemis-rgb-fg:white;--artemis-rgb-el:#4c5059}.artemis-rgb-settings > p:last-child{font-family:monospace}`
-    div.append(style, label, input, button, currentUrlLabel, currentUrl)
+    style.textContent = `.artemis-rgb-settings{padding:20px;box-sizing:border-box;border-radius:10px}.artemis-rgb-settings label,.artemis-rgb-settings p:nth-child(5){font-weight:bold}.artemis-rgb-settings div{display:flex;align-items:center}.artemis-rgb-settings > div > p{margin:9px 0 0;font-family:monospace}.artemis-rgb-settings input{background-color:var(--artemis-rgb-el);border:none;padding:5px 10px;border-radius:5px;color:var(--artemis-rgb-fg);font-family:monospace;width:100%;box-sizing:border-box;margin-top:10px}.artemis-rgb-settings > button{margin:5px 0;padding:10px 22px;background-color:#3E82E5;color:white;border-radius:3px;border:none;transition:background-color 0.15s ease}.artemis-rgb-settings > button:hover{background-color:#3875CE}.artemis-rgb-settings > button:active{background-color:#3268B7}.theme-light .artemis-rgb-settings{color:black;background-color:#ffffff;--artemis-rgb-bg:#ffffff;--artemis-rgb-fg:black;--artemis-rgb-el:#ddd}.theme-dark .artemis-rgb-settings{color:white;background-color:#36393F;--artemis-rgb-bg:#36393F;--artemis-rgb-fg:white;--artemis-rgb-el:#4c5059}.artemis-rgb-settings > p:nth-child(6){font-family:monospace}.artemis-rgb-settings span{padding:0 7px;border-radius:4px}.artemis-rgb-settings span.error{background-color:#982929}.artemis-rgb-settings span.success{background-color:green}.artemis-rgb-settings span.pending{background-color:#AB892E}`
+    div.append(style, label, innerContainer, button, currentUrlLabel, currentUrl, lastReq)
     return div
   }
 
@@ -150,22 +191,71 @@ module.exports = class ArtemisGSI {
 
   load () {}// legacy
 
+  urlToFormat(url) {
+    try {
+      url = new URL(url)
+    }
+    catch {
+      console.error("[ArtemisGSI]: Invalid url:", x)
+      return true
+    }
+    return url.hostname + ':' + url.port
+  }
+
+  currentUrl() {
+    return this.host + ":" + this.port
+  }
+
+  invalidateUrl() {
+    this.host = undefined
+    this.port = undefined
+  }
+
+  setUrl(x, showErrors) {
+    if (!x.startsWith("http://")) x = "http://" + x
+    let url;
+    try {
+      url = new URL(x)
+    }
+    catch {
+      console.error("[ArtemisGSI]: Invalid url:", x)
+      return true
+    }
+    if (!url.port) {
+      if (showErrors) BdApi.showToast("Please specify a port!", {type:"error"})
+      return true
+    }
+    if (!url.host) {
+      if (showErrors) BdApi.showToast("Please specify a host!", {type:"error"})
+      return true
+    }
+    this.host = url.hostname
+    this.port = url.port
+    return false
+  }
+
   start () {
-    this.pluginUrlEnding = "plugins/de1123d1-4ce5-418f-a761-20ed2ffb9566/betterDiscordData"
+
     this.savedUrl = BdApi.loadData("ArtemisGSI", "endpoint-url") || ""
+
     let fs = require("fs")
     if (fs.existsSync("C:/ProgramData/Artemis/webserver.txt")) {
       this.defaultUrl = fs.readFileSync("C:/ProgramData/Artemis/webserver.txt", 'utf8')
       if (this.defaultUrl.startsWith("http://*:")) this.defaultUrl = "http://localhost:" + this.defaultUrl.slice(9);
     }
     else if (!this.savedUrl) {
-      BdApi.alert("Plugin Error","Artemis doesn't seem to be installed! Couldn't find the webserver.txt file at \"C:/ProgramData/Artemis/webserver.txt\" \n\n If you know that it is installed, please set the root URL in settings!")
+      BdApi.alert("Plugin Error","Artemis doesn't seem to be installed! Couldn't find the webserver.txt file at \"C:/ProgramData/Artemis/webserver.txt\" \n\n If you know that it is installed, please set a host URL in settings!")
     }
-    if (this.savedUrl) this.url = this.savedUrl + this.pluginUrlEnding
-    else if (this.defaultUrl) this.url = this.defaultUrl + this.pluginUrlEnding
-    else this.url = undefined
-    console.log("[ArtemisGSI]: Using '" + this.url + "'")
 
+    if (this.savedUrl) this.setUrl(this.savedUrl)
+    else if (this.defaultUrl) { 
+      let error = this.setUrl(this.defaultUrl)
+      if (error) BdApi.alert("Plugin Error",`There is no saved URL and the one Artemis provided (${this.defaultUrl}) cannot be parsed. Please report this error!`)
+    }
+    console.log(`[ArtemisGSI]: Using host "${this.host}" and port "${this.port}"`)
+
+    this.http = require("http")
+    this.lastRequestWasError = false
     this.json = {
       user:{
         id: -1,
@@ -306,7 +396,7 @@ module.exports = class ArtemisGSI {
 
       if (JSON.stringify(this.json) !== this.lastJson) {
         this.lastJson = JSON.stringify(this.json);
-        this.sendJsonToArtemis(this.json);
+        this.sendJsonViaHttp(this.json);
       }
     }, 100);
   }
@@ -321,6 +411,37 @@ module.exports = class ArtemisGSI {
       }
     })
       .catch(error => console.log(`Artemis GSI error: ${error}`));
+  }
+
+  sendJsonViaHttp(json, callback) {
+    if (!this.host || !this.port) {
+      console.warn("[ArtemisGSI] Host or port is undefined!")
+    }
+
+    const data = JSON.stringify(json)
+
+    const req = http.request({
+      hostname: this.host,
+      port: this.port,
+      path: '/plugins/de1123d1-4ce5-418f-a761-20ed2ffb9566/betterDiscordData',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': data.length
+      }
+    }, _=>{
+      this.lastRequestWasError = false
+      if (callback) callback(false)
+    })
+
+    req.on("error", (e)=>{ 
+      console.error(e)
+      this.lastRequestWasError = true  
+      if (callback) callback(true)
+    })
+
+    req.write(data)
+    req.end()
   }
 
   stop () {
