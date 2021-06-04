@@ -90,6 +90,10 @@ module.exports = class ArtemisGSI {
                     `
                       Bug Fixes for the settings menu + clean up properly on restarts.
                     `
+        '4.2.2':
+                    `
+                      Rebuild for latest Artemis version.
+                    `
         };
     }
 
@@ -111,7 +115,7 @@ module.exports = class ArtemisGSI {
 
     let button = document.createElement("button")
     button.textContent = "Set URL"
-    
+
     let currentUrlLabel = document.createElement("p")
     currentUrlLabel.textContent = "Current URL:"
     let currentUrl = document.createElement("p")
@@ -175,7 +179,7 @@ module.exports = class ArtemisGSI {
             status.classList.add(error ? "error" : "success")
             status.textContent = error ? "Error" : "Success"
           })
-          
+
         }
       }
     })
@@ -261,7 +265,7 @@ module.exports = class ArtemisGSI {
     }
 
     if (this.savedUrl) this.setUrl(this.savedUrl)
-    else if (this.defaultUrl) { 
+    else if (this.defaultUrl) {
       let error = this.setUrl(this.defaultUrl)
       if (error) BdApi.alert("Plugin Error",`There is no saved URL and the one Artemis provided (${this.defaultUrl}) cannot be parsed. Please report this error!`)
     }
@@ -314,7 +318,7 @@ module.exports = class ArtemisGSI {
        * { getChannel } = getModule([ 'getChannel' ], false), // we dont use this yet
        * const { getVoiceStates } = getModule([ 'getVoiceState' ], false),
        */
-    
+
     this.updatetimer = setInterval(() => {
       // eslint-disable-next-line consistent-this
       const guild = this.getSelectedGuild();
@@ -438,9 +442,9 @@ module.exports = class ArtemisGSI {
       if (callback) callback(false)
     })
 
-    req.on("error", (e)=>{ 
+    req.on("error", (e)=>{
       console.error(e)
-      this.lastRequestWasError = true  
+      this.lastRequestWasError = true
       if (callback) callback(true)
     })
 

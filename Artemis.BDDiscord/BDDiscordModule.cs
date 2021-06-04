@@ -1,21 +1,21 @@
 ﻿using Artemis.BDDiscord.DataModels;
-using Artemis.Core.DataModelExpansions;
+using Artemis.Core.Modules;
 using Artemis.Core.Services;
 
 namespace Artemis.BDDiscord
 {
-    public class BDDiscordModelExpansion : DataModelExpansion<BDDiscordDataModel>
+    public class BDDiscordModule : Module<BDDiscordDataModel>
     {
         private readonly IWebServerService _webServerService;
 
-        public BDDiscordModelExpansion(IWebServerService webServerService)
+        public BDDiscordModule(IWebServerService webServerService)
         {
             _webServerService = webServerService;
         }
 
         public override void Enable()
         {
-            DataModelJsonPluginEndPoint<BDDiscordDataModel> dataModelEndPoint = _webServerService.AddDataModelJsonEndPoint(this, "betterDiscordData");
+            _webServerService.AddDataModelJsonEndPoint(this, "betterDiscordData");
         }
 
         public override void Disable()
@@ -26,6 +26,16 @@ namespace Artemis.BDDiscord
         public override void Update(double deltaTime)
         {
             
+        }
+
+        public override void ModuleActivated(bool isOverride)
+        {
+
+        }
+
+        public override void ModuleDeactivated(bool isOverride)
+        {
+
         }
     }
 }
