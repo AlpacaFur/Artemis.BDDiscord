@@ -15,6 +15,10 @@ namespace Artemis.BDDiscord
 
         public override void Enable()
         {
+            DisplayName = "Better Discord";
+            DisplayIcon = "BDDiscord.svg";
+            // ActivationRequirements.Add(new ProcessActivationRequirement("DiscordCanary"));
+            // ActivationRequirements.Add(new ProcessActivationRequirement("Discord"));
             _webServerService.AddDataModelJsonEndPoint(this, "betterDiscordData");
         }
 

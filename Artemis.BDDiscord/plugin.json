@@ -4,5 +4,7 @@
   "Description": "An integration with BetterDiscord for Artemis. This will not work with regular Discord.",
   "Version": "4.2.2.0",
   "Icon": "BDDiscord.svg",
-  "Main": "Artemis.BDDiscord.dll"
+  "Main": "Artemis.BDDiscord.dll",
+  "Author": "AlpacaFur",
+  "Repository": "https://github.com/AlpacaFur/Artemis.CSGO"
 }
