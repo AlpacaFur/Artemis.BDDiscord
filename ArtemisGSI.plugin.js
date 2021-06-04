@@ -94,6 +94,10 @@ module.exports = class ArtemisGSI {
                     `
                       Rebuild for latest Artemis version.
                     `
+        '4.2.3':
+                    `
+                      Update plugin author/repo link.
+                    `
         };
     }
 
