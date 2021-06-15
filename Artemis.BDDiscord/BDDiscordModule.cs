@@ -1,9 +1,12 @@
 ﻿using Artemis.BDDiscord.DataModels;
+using Artemis.Core;
 using Artemis.Core.Modules;
 using Artemis.Core.Services;
+using System.Collections.Generic;
 
 namespace Artemis.BDDiscord
 {
+    [PluginFeature(Name = "BetterDiscord", Icon = "BDDiscord.svg")]
     public class BDDiscordModule : Module<BDDiscordDataModel>
     {
         private readonly IWebServerService _webServerService;
@@ -13,12 +16,14 @@ namespace Artemis.BDDiscord
             _webServerService = webServerService;
         }
 
+        public override List<IModuleActivationRequirement> ActivationRequirements { get; } = new()
+        {
+            new ProcessActivationRequirement("DiscordCanary"),
+            new ProcessActivationRequirement("Discord"),
+        };
+
         public override void Enable()
         {
-            DisplayName = "Better Discord";
-            DisplayIcon = "BDDiscord.svg";
-            // ActivationRequirements.Add(new ProcessActivationRequirement("DiscordCanary"));
-            // ActivationRequirements.Add(new ProcessActivationRequirement("Discord"));
             _webServerService.AddDataModelJsonEndPoint(this, "betterDiscordData");
         }
 

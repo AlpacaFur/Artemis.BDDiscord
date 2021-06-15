@@ -89,14 +89,18 @@ module.exports = class ArtemisGSI {
         '4.2.1':
                     `
                       Bug Fixes for the settings menu + clean up properly on restarts.
-                    `
+                    `,
         '4.2.2':
                     `
                       Rebuild for latest Artemis version.
-                    `
+                    `,
         '4.2.3':
                     `
                       Update plugin author/repo link.
+                    `,
+        '4.2.4':
+                    `
+                      Rebuild for latest Artemis version.
                     `
         };
     }
