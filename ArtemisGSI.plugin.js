@@ -14,7 +14,7 @@ module.exports = class ArtemisGSI {
     }
 
     getVersion () {
-        return '4.2.1';
+        return '4.2.5';
     }
 
     getAuthor () {
@@ -101,6 +101,10 @@ module.exports = class ArtemisGSI {
         '4.2.4':
                     `
                       Rebuild for latest Artemis version.
+                    `,
+        '4.2.5':
+                    `
+                      Fix unread messages.
                     `
         };
     }
@@ -316,7 +320,7 @@ module.exports = class ArtemisGSI {
     const { getUser } = getModule([ 'getUser' ], false),
       voice = getModule([ 'isMute', 'isDeaf', 'isSelfMute', 'isSelfDeaf' ], false),
       { getCalls } = getModule([ 'getCalls' ], false),
-      { getUnreadGuilds } = getModule([ 'getUnreadGuilds' ], false),
+      { getMutableGuildStates: getUnreadGuilds } = getModule([ 'getMutableGuildStates' ], false),
       { getTotalMentionCount } = getModule([ 'getTotalMentionCount' ], false),
       isMute = voice.isMute.bind(voice),
       isDeaf = voice.isDeaf.bind(voice),
@@ -413,7 +417,7 @@ module.exports = class ArtemisGSI {
       this.json.user.being_called = false;
 
       this.json.user.mentions = getTotalMentionCount();
-      this.json.user.unread_messages = Object.values(getUnreadGuilds()).length;
+      this.json.user.unread_messages = Object.values(getUnreadGuilds()).filter(obj => Object.values(obj).includes(true)).length;
 
       if (getCalls().filter((x) => x.ringing.length > 0).length > 0) {
         this.json.user.being_called = true;
