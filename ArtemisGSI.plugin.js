@@ -14,7 +14,7 @@ module.exports = class ArtemisGSI {
     }
 
     getVersion () {
-        return '4.2.5';
+        return '4.2.6';
     }
 
     getAuthor () {
@@ -105,6 +105,10 @@ module.exports = class ArtemisGSI {
         '4.2.5':
                     `
                       Fix unread messages.
+                    `,
+        '4.2.6':
+                    `
+                      Fix for latest Canary update.
                     `
         };
     }
@@ -202,20 +206,20 @@ module.exports = class ArtemisGSI {
   }
 
   getSelectedGuild () {
-    const channel = this.getChannel(this.channels.getChannelId())
-    return channel ? this.getGuild(channel.guild_id) : null;
+    return this.getGuild(getModule(['getLastSelectedGuildId'], false).getGuildId());
+    //return channel ? this.getGuild(channel.guild_id) : null;
   }
 
   getSelectedTextChannel () {
-    return this.getChannel(this.channels.getChannelId());
+    return this.getChannel(getModule(['getLastSelectedChannelId'], false).getChannelId());
   }
 
   getSelectedVoiceChannel () {
-    return this.getChannel(this.channels.getVoiceChannelId());
+    return this.getChannel(getModule(['getLastSelectedChannelId'], false).getVoiceChannelId());
   }
 
   getLocalStatus () {
-    return this.getStatus(this.getCurrentUser().id);
+    return getModule([ 'guildPositions' ]).status;
   }
 
   urlToFormat(url) {
@@ -313,8 +317,7 @@ module.exports = class ArtemisGSI {
     // eslint-disable-next-line no-unused-expressions
     this.lastJson;
     this.getCurrentUser = getModule([ 'getUser', 'getUsers' ], false).getCurrentUser;
-    this.getStatus = getModule([ 'getApplicationActivity' ], false).getStatus;
-    this.getChannel = getModule([ 'getChannel' ], false).getChannel;
+    this.getChannel = getModule([ "getChannel", "getDMFromUserId" ], false).getChannel;
     this.getGuild = getModule([ 'getGuild' ], false).getGuild;
     this.channels = getModule([ 'getChannelId' ], false);
     const { getUser } = getModule([ 'getUser' ], false),
@@ -347,9 +350,6 @@ module.exports = class ArtemisGSI {
       if (localUser && localStatus) {
         this.json.user.id = localUser.id;
         this.json.user.status = localStatus;
-      } else {
-        this.json.user.id = -1;
-        this.json.user.status = '';
       }
 
       if (guild) {
