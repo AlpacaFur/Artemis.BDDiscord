@@ -317,7 +317,7 @@ module.exports = class ArtemisGSI {
     // eslint-disable-next-line no-unused-expressions
     this.lastJson;
     this.getCurrentUser = getModule([ 'getUser', 'getUsers' ], false).getCurrentUser;
-    this.getChannel = getModule([ "getChannel", "getDMFromUserId" ], false).getChannel;
+    this.getChannel = getModule([ 'getChannel', 'getDMFromUserId' ], false).getChannel;
     this.getGuild = getModule([ 'getGuild' ], false).getGuild;
     this.channels = getModule([ 'getChannelId' ], false);
     const { getUser } = getModule([ 'getUser' ], false),
@@ -350,6 +350,9 @@ module.exports = class ArtemisGSI {
       if (localUser && localStatus) {
         this.json.user.id = localUser.id;
         this.json.user.status = localStatus;
+      } else {
+        this.json.user.id = -1;
+        this.json.user.status = '';
       }
 
       if (guild) {
