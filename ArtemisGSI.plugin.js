@@ -109,6 +109,7 @@ module.exports = class ArtemisGSI {
         '4.2.6':
                     `
                       Fix for latest Canary update.
+                      Fix for getting name of announcement channels.
                     `
         };
     }
@@ -367,6 +368,9 @@ module.exports = class ArtemisGSI {
         this.json.text.id = textChannel.id;
         if (textChannel.type === 0) { // text channel
           this.json.text.type = 0;
+          this.json.text.name = textChannel.name;
+        } else if (textChannel.type === 5) { // announcement channel
+          this.json.text.type = 5;
           this.json.text.name = textChannel.name;
         } else if (textChannel.type === 1) { // pm
           this.json.text.type = 1;
