@@ -98,7 +98,8 @@ namespace Artemis.BDDiscord.DataModels
             Server = 0,
             DM = 1,
             GroupDM = 3,
-            ServerAnnouncements = 5
+            ServerAnnouncements = 5,
+            ServerThread = 11
         }
         [DataModelProperty(Name = "Channel ID")]
         public string id { get; set; }
