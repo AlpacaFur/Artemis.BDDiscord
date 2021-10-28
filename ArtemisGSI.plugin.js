@@ -110,6 +110,7 @@ module.exports = class ArtemisGSI {
                     `
                       Fix for latest Canary update.
                       Fix for getting name of announcement channels.
+                      Fix for getting name of threads channels.
                     `
         };
     }
@@ -371,6 +372,9 @@ module.exports = class ArtemisGSI {
           this.json.text.name = textChannel.name;
         } else if (textChannel.type === 5) { // announcement channel
           this.json.text.type = 5;
+          this.json.text.name = textChannel.name;
+        } else if (textChannel.type === 11) { // thread channel
+          this.json.text.type = 11;
           this.json.text.name = textChannel.name;
         } else if (textChannel.type === 1) { // pm
           this.json.text.type = 1;
