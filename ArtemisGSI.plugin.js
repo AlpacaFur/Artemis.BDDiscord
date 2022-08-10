@@ -14,7 +14,7 @@ module.exports = class ArtemisGSI {
     }
 
     getVersion () {
-        return '4.2.6';
+        return '4.2.7';
     }
 
     getAuthor () {
@@ -110,7 +110,10 @@ module.exports = class ArtemisGSI {
                     `
                       Fix for latest Canary update.
                       Fix for getting name of announcement channels.
-                      Fix for getting name of threads channels.
+                    `,
+        '4.2.7':
+                    `
+                      Fix for status not updating.
                     `
         };
     }
@@ -221,7 +224,7 @@ module.exports = class ArtemisGSI {
   }
 
   getLocalStatus () {
-    return getModule([ 'guildPositions' ]).status;
+    return getModule([ 'getStatus', 'getState' ], false).getStatus(this.getCurrentUser().id);
   }
 
   urlToFormat(url) {
@@ -370,10 +373,10 @@ module.exports = class ArtemisGSI {
         if (textChannel.type === 0) { // text channel
           this.json.text.type = 0;
           this.json.text.name = textChannel.name;
-        } else if (textChannel.type === 5) { // announcement channel
+        } else if (textChannel.type === 5) { // announcements
           this.json.text.type = 5;
           this.json.text.name = textChannel.name;
-        } else if (textChannel.type === 11) { // thread channel
+        } else if (textChannel.type === 11) { // thread
           this.json.text.type = 11;
           this.json.text.name = textChannel.name;
         } else if (textChannel.type === 1) { // pm
