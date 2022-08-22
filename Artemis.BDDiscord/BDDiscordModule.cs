@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Artemis.BDDiscord
 {
-    [PluginFeature(Name = "BetterDiscord", Icon = "BDDiscord.svg")]
+    [PluginFeature(Name = "BetterDiscord", Icon = "BDDiscordIcon.png")]
     public class BDDiscordModule : Module<BDDiscordDataModel>
     {
         private readonly IWebServerService _webServerService;

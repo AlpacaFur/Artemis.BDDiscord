@@ -14,7 +14,7 @@ module.exports = class ArtemisGSI {
     }
 
     getVersion () {
-        return '4.2.7';
+        return '5.0.0';
     }
 
     getAuthor () {
@@ -114,6 +114,10 @@ module.exports = class ArtemisGSI {
         '4.2.7':
                     `
                       Fix for status not updating.
+                    `,
+        '5.0.0':
+                    `
+                      Update for Avalonia.
                     `
         };
     }

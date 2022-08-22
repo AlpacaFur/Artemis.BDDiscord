@@ -1,10 +1,11 @@
 {
-  "Guid": "de1123d1-4ce5-418f-a761-20ed2ffb9566",
-  "Name": "Better Discord",
-  "Description": "An integration with BetterDiscord for Artemis. This will not work with regular Discord.",
-  "Version": "4.2.4.0",
-  "Icon": "BDDiscord.svg",
-  "Main": "Artemis.BDDiscord.dll",
-  "Author": "AlpacaFur",
-  "Repository": "https://github.com/AlpacaFur/Artemis.CSGO"
+	"API": "1.0",
+	"Author": "AlpacaFur",
+	"Description": "An integration with BetterDiscord for Artemis. This will not work with regular Discord.",
+	"Guid": "de1123d1-4ce5-418f-a761-20ed2ffb9566",
+	"Icon": "BDDiscordIcon.png",
+	"Main": "Artemis.BDDiscord.dll",
+	"Name": "Better Discord",
+	"Repository": "https://github.com/AlpacaFur/Artemis.CSGO",
+	"Version": "5.0.0.0"
 }
