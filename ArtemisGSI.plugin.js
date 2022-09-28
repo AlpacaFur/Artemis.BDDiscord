@@ -1,8 +1,21 @@
 //META{"name":"ArtemisGSI","website":"https://artemis-rgb.com/","source":"https://github.com/AlpacaFur/Artemis.BDDiscord"}*//
 
-function getModule (props) {
-return BdApi.findModuleByProps.apply(null, props);
+function returnModule (props) {
+      return BdApi.Webpack.getModule(BdApi.Webpack.Filters.byProps(props));
 }
+
+const guildModule = returnModule(['getLastSelectedGuildId']);
+const selectedChannelModule = returnModule(['getLastSelectedChannelId']);
+const userIdModule = returnModule([ 'getUserIds' ]);
+const channelModule = returnModule([ 'getChannel' ], false);
+const currentUserModule = returnModule([ 'getCurrentUser' ], false);
+const guildCountModule = returnModule([ 'getGuildCount' ], false);
+const channelsModule = returnModule([ 'getChannelId' ], false);
+const userModule = returnModule([ 'getUser' ], false);
+const muteModule = returnModule([ 'isMute' ], false);
+const callsModule = returnModule([ 'getCalls' ], false);
+const mutableGuildsModule = returnModule([ 'getMutableGuildStates' ], false);
+const totalMentionsModule = returnModule([ 'getTotalMentionCount' ], false);
 
 module.exports = class ArtemisGSI {
     getName () {
@@ -14,7 +27,7 @@ module.exports = class ArtemisGSI {
     }
 
     getVersion () {
-        return '5.0.0';
+        return '5.1.0';
     }
 
     getAuthor () {
@@ -118,6 +131,11 @@ module.exports = class ArtemisGSI {
         '5.0.0':
                     `
                       Update for Avalonia.
+                    `,
+        '5.1.0':
+                    `
+                    Fixing everything for latest BD update
+                    Stop using depreciated functions
                     `
         };
     }
@@ -215,20 +233,20 @@ module.exports = class ArtemisGSI {
   }
 
   getSelectedGuild () {
-    return this.getGuild(getModule(['getLastSelectedGuildId'], false).getGuildId());
+    return this.getGuild(guildModule.getGuildId());
     //return channel ? this.getGuild(channel.guild_id) : null;
   }
 
   getSelectedTextChannel () {
-    return this.getChannel(getModule(['getLastSelectedChannelId'], false).getChannelId());
+    return this.getChannel(selectedChannelModule.getChannelId());
   }
 
   getSelectedVoiceChannel () {
-    return this.getChannel(getModule(['getLastSelectedChannelId'], false).getVoiceChannelId());
+    return this.getChannel(selectedChannelModule.getVoiceChannelId());
   }
 
   getLocalStatus () {
-    return getModule([ 'getStatus', 'getState' ], false).getStatus(this.getCurrentUser().id);
+    return userIdModule.getStatus(this.getCurrentUser().id);
   }
 
   urlToFormat(url) {
@@ -296,7 +314,6 @@ module.exports = class ArtemisGSI {
     }
     console.log(`[ArtemisGSI]: Using host "${this.host}" and port "${this.port}"`)
 
-    this.http = require("http")
     this.lastRequestWasError = true
     this.json = {
       user:{
@@ -325,15 +342,15 @@ module.exports = class ArtemisGSI {
     };
     // eslint-disable-next-line no-unused-expressions
     this.lastJson;
-    this.getCurrentUser = getModule([ 'getUser', 'getUsers' ], false).getCurrentUser;
-    this.getChannel = getModule([ 'getChannel', 'getDMFromUserId' ], false).getChannel;
-    this.getGuild = getModule([ 'getGuild' ], false).getGuild;
-    this.channels = getModule([ 'getChannelId' ], false);
-    const { getUser } = getModule([ 'getUser' ], false),
-      voice = getModule([ 'isMute', 'isDeaf', 'isSelfMute', 'isSelfDeaf' ], false),
-      { getCalls } = getModule([ 'getCalls' ], false),
-      { getMutableGuildStates: getUnreadGuilds } = getModule([ 'getMutableGuildStates' ], false),
-      { getTotalMentionCount } = getModule([ 'getTotalMentionCount' ], false),
+    this.getCurrentUser = currentUserModule.getCurrentUser;
+    this.getChannel = channelModule.getChannel;
+    this.getGuild = guildCountModule.getGuild;
+    this.channels = channelsModule;
+    const { getUser } = userModule,
+      voice = muteModule,
+      { getCalls } = callsModule,
+      { getMutableGuildStates: getUnreadGuilds } = mutableGuildsModule,
+      { getTotalMentionCount } = totalMentionsModule,
       isMute = voice.isMute.bind(voice),
       isDeaf = voice.isDeaf.bind(voice),
       isSelfMute = voice.isSelfMute.bind(voice),
@@ -458,11 +475,10 @@ module.exports = class ArtemisGSI {
 
     const data = JSON.stringify(json)
 
-    const req = this.http.request({
-      hostname: this.host,
-      port: this.port,
-      path: '/plugins/de1123d1-4ce5-418f-a761-20ed2ffb9566/betterDiscordData',
+    const req = fetch(`http://${this.host}:${this.port}/plugins/de1123d1-4ce5-418f-a761-20ed2ffb9566/betterDiscordData`, {
       method: 'POST',
+      body: data,
+      mode: `no-cors`,
       headers: {
         'Content-Type': 'application/json',
         'Content-Length': data.length
@@ -472,14 +488,11 @@ module.exports = class ArtemisGSI {
       if (callback) callback(false)
     })
 
-    req.on("error", (e)=>{
+    req.catch((e)=>{
       console.error(e)
       this.lastRequestWasError = true
       if (callback) callback(true)
     })
-
-    req.write(data)
-    req.end()
   }
 
   stop () {
